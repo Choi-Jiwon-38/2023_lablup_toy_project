@@ -41,6 +41,13 @@
             ws.send(chat_message.value);
             chat_message.value = '';                // 메세지 전송 성공 시, 메세지 입력 창 초기화
         })
+
+        chat_input.addEventListener('keyup', (e) => {   // chat_input 안에서 사용자가 누른 키보드 키가 올라올 때
+            if (e.keyCode == 13) {                      // 사용자가 누른 키보드의 key code가 13일 때 (ENTER)
+                e.preventDefault();                     // 이벤트 기본 동작(ex: form 제출)를 막기 위하여 사용
+                send.click();                           // send(채팅 전송 버튼)에 click 이벤트 발생
+            }
+        })
         
     </script>
 </body>
