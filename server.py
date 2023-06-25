@@ -1,17 +1,17 @@
 from aiohttp import web
 import aiohttp_cors
 
-async def index():
+async def index(request):               # '/'에 대한 GET 요청 발생 시 실행
+    f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
+    return web.Response(text=f.read(), content_type='text/html')    # index.html 파일의 내용을 web.Response 객체로 반환
+
+
+async def chat_get_handler(request):
     # TODO
     pass
 
 
-async def chat_get_handler():
-    # TODO
-    pass
-
-
-async def chat_post_handler():
+async def chat_post_handler(request):
     # TODO
     pass
 
