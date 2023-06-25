@@ -17,8 +17,19 @@ async def chat_post_handler(request):
 
 
 async def websocket_handler(request):
-    # TODO
-    pass
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+
+    app['websockets'].add(ws)
+
+    try:
+        async for message in ws:
+            for client in app['websockets']:
+                await client.send_str(message.data)
+    finally:
+        app['websockets'].remove(ws)
+
+    return ws
 
 
 # 웹 애플리케이션 관련 설정

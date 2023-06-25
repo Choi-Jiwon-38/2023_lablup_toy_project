@@ -15,11 +15,33 @@
     <div>
         <div id="chat_list"></div>
         <div id="chat_input">
-            <input type="text" id="chat_message"> 
+            <input type="text" id="chat_message">
             <button id="send">전송</button>
         </div>
     </div>
     <script type="text/javascript">
+
+        chat_list       = document.querySelector('#chat_list');     // 전체 채팅 목록 화면
+        chat_input      = document.querySelector('#chat_input');
+        chat_message    = document.querySelector('#chat_message');  // 사용자 채팅 입력 화면
+        send            = document.querySelector('#send');          // 사용자 채팅 전송 버튼
+
+        const ws        = new WebSocket(`ws://${window.location.host}/ws`);         // WebSocket 생성 및 할당
+        ws.onopen       = ()  => {console.log('Successfully connected to the server')};     // WebSocket 연결 성공 시, console log 출력
+        ws.onmessage    = (e) => {
+            console.log(e.data);
+            const new_message = document.createElement('div');                      // 새로운 채팅 메세지를 담을 div 태그 생성
+            new_message.innerHTML = e.data;                                         // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
+            chat_list.appendChild(new_message); 
+        };
+
+        send.addEventListener('click', (e) => {     // 사용자 채팅 전송 버튼에 click event 추가
+            if (chat_message.value == '')           // input에 사용자가 입력한 값이 없을 경우
+                return;
+            ws.send(chat_message.value);
+            chat_message.value = '';                // 메세지 전송 성공 시, 메세지 입력 창 초기화
+        })
+        
     </script>
 </body>
 </html>
