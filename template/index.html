@@ -72,6 +72,23 @@
             height: 100%;
             overflow-y: scroll;
         }
+        
+        /* scroll bar 관련 style 설정 */
+        #chat_list::-webkit-scrollbar {
+            width: 10px;
+            background-color: #262626;
+        }
+        #chat_list::-webkit-scrollbar-thumb {
+            background-color: #686868;
+            border-radius: 10px;
+            background-clip: padding-box;
+            border: 2px solid transparent;
+        }
+        #chat_list::-webkit-scrollbar-track {
+            background-color: #262626;
+            border-radius: 10px;
+        }
+
         #chat_message {
             width: 100%;
             background-color: #262626;
