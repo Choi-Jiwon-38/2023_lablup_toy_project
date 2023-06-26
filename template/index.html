@@ -84,12 +84,28 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        .chat_bubble {
+        .chat_mine {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .chat_other {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .chat_bubble_mine {
             width: fit-content;
             background-color: #FAE54D;
             border-radius: 8px;
             padding: 8px 12px;
-            margin: 8px 12px;
+            margin: 4px 16px;
+        }   
+        .chat_bubble_other {
+            width: fit-content;
+            background-color: #383838;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 4px 16px;
         }   
 
     </style>
@@ -109,14 +125,29 @@
         chat_message    = document.querySelector('#chat_message');  // 사용자 채팅 입력 화면
         send            = document.querySelector('#send');          // 사용자 채팅 전송 버튼
 
-        const ws        = new WebSocket(`ws://${window.location.host}/ws`);         // WebSocket 생성 및 할당
+        function get_cookie(name) { // name을 통하여 특정 cookie 찾아서 값을 반환하는 함수
+            var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return value? value[2] : null;
+        }
+
+        const ws        = new WebSocket(`ws://${window.location.host}/ws`);                 // WebSocket 생성 및 할당
         ws.onopen       = ()  => {console.log('Successfully connected to the server')};     // WebSocket 연결 성공 시, console log 출력
         ws.onmessage    = (e) => {
-            console.log(e.data);
-            const new_message = document.createElement('div');                      // 새로운 채팅 메세지를 담을 div 태그 생성
-            new_message.innerHTML = e.data;                                         // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
-            new_message.className = 'chat_bubble';  // style 적용을 위하여 class 추가
-            chat_list.appendChild(new_message); 
+            data_object = JSON.parse(e.data);
+            const new_container = document.createElement('div');
+            const new_message   = document.createElement('div');                    // 새로운 채팅 메세지를 담을 div 태그 생성
+            new_message.innerHTML = data_object.message;                            // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
+            
+            // 자신이 보낸 메세지와 상대방이 보낸 메세지를 구별하기 위함
+            if (get_cookie('sessionId') == data_object.id) {    // 본인이 보낸 메세지인 경우 (session id가 일치하는 경우)
+                new_container.className = 'chat_mine'
+                new_message.className   = 'chat_bubble_mine';   // style 적용을 위하여 class 부여
+            } else {                                            // 상대방이 보낸 메세지인 경우 (session id가 일치하지 않는 경우)
+                new_container.className = 'chat_other'
+                new_message.className   = 'chat_bubble_other';  // style 적용을 위하여 class 부여
+            }
+            chat_list.appendChild(new_container);
+            new_container.appendChild(new_message); 
         };
 
         send.addEventListener('click', (e) => {     // 사용자 채팅 전송 버튼에 click event 추가

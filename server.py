@@ -3,14 +3,21 @@ import aiohttp_cors
 import aioredis
 import asyncio
 import async_timeout
-
+import aiohttp_session
+from aiohttp_session import get_session
+import uuid
 
 async def index(request):               # '/'에 대한 GET 요청 발생 시 실행
     f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
-    # test
-    await chat_get_handler(request)
+    session         = await get_session(request)
+    session['id']   = str(uuid.uuid4())
+    print(session['id'])
 
-    return web.Response(text=f.read(), content_type='text/html')    # index.html 파일의 내용을 web.Response 객체로 반환
+    # 세션 ID를 함께 return하는 web.Response 객체 생성
+    response = web.Response(text=f.read(), content_type='text/html')
+    response.set_cookie('sessionId', session['id'])
+
+    return response
 
 
 async def chat_get_handler(request):
@@ -37,6 +44,7 @@ async def websocket_handler(request):
     app = request.app
     ws  = web.WebSocketResponse()
     await ws.prepare(request)
+    session         = await get_session(request)
 
     app['websockets'].add(ws)
 
@@ -44,7 +52,7 @@ async def websocket_handler(request):
         async for message in ws:
             for client in app['websockets']:
                 await chat_post_handler(request, str(message.data))
-                await client.send_str(message.data)
+                await client.send_json({'id': session['id'], 'message': message.data})
     finally:
         app['websockets'].remove(ws)
 
@@ -70,6 +78,9 @@ async def init_app():                               # 웹 애플리케이션 관
     for route in list(app.router.routes()):
         cors.add(route)
     
+    # 브라우저 세션 설정 (브라우저 세션마다 고유 id 할당 목적)
+    aiohttp_session.setup(app, aiohttp_session.SimpleCookieStorage())
+
     return app
 
 
