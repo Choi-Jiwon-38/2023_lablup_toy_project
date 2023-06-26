@@ -9,18 +9,101 @@
             margin: 0;
             padding: 0;
         }
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* input 관련 style 초기화 */
+        input {
+            -webkit-appearance : none; 
+            -moz-appearance:none;
+            appearance: none;
+            outline: none;
+            border: none;
+            background: transparent;
+        }
+        input::-ms-clear { display: none; }
+
+        /* button 관련 style 초기화 */
+        button {
+            border: none;
+        }
+
+        button:focus {
+            border: none;
+            outline: none;
+        }
+
+        button:focus{
+            outline:none !important;
+        }
+
+        /* 채팅창 관련 style 설정 */
+        #chat_container {
+            width: 360px;
+            height: 800px;
+            border-radius: 10px;
+            border-color: #525252;
+            background-color: #191919;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #chat_title {
+            width: 100%;
+            text-align: center;
+            color: white;
+            padding: 24px 0px;
+        }
+        #chat_input {
+            display: flex;
+            background-color: #262626;
+            width: 100%;
+            height: 36px;
+            padding: 12px 0px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        #chat_list {
+            height: 100%;
+        }
+        #chat_message {
+            width: 100%;
+            background-color: #262626;
+            color: white;
+            padding-left: 12px;
+        }
+        #send {
+            width: 52px;
+            margin-right: 12px;
+            background-color: #FAE54D;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .chat_bubble {
+            width: fit-content;
+            background-color: #FAE54D;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 8px 12px;
+        }   
+
     </style>
 </head>
 <body>
-    <div>
+    <div id="chat_container">
+        <div id="chat_title">Simple Chat with aiohttp</div>
         <div id="chat_list"></div>
         <div id="chat_input">
-            <input type="text" id="chat_message">
+            <input type="text" id="chat_message" maxlength="22">
             <button id="send">전송</button>
         </div>
     </div>
     <script type="text/javascript">
-
         chat_list       = document.querySelector('#chat_list');     // 전체 채팅 목록 화면
         chat_input      = document.querySelector('#chat_input');
         chat_message    = document.querySelector('#chat_message');  // 사용자 채팅 입력 화면
@@ -32,6 +115,7 @@
             console.log(e.data);
             const new_message = document.createElement('div');                      // 새로운 채팅 메세지를 담을 div 태그 생성
             new_message.innerHTML = e.data;                                         // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
+            new_message.className = 'chat_bubble';  // style 적용을 위하여 class 추가
             chat_list.appendChild(new_message); 
         };
 
@@ -48,7 +132,6 @@
                 send.click();                           // send(채팅 전송 버튼)에 click 이벤트 발생
             }
         })
-        
     </script>
 </body>
 </html>
