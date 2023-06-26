@@ -70,6 +70,7 @@
         }
         #chat_list {
             height: 100%;
+            overflow-y: scroll;
         }
         #chat_message {
             width: 100%;
@@ -147,7 +148,8 @@
                 new_message.className   = 'chat_bubble_other';  // style 적용을 위하여 class 부여
             }
             chat_list.appendChild(new_container);
-            new_container.appendChild(new_message); 
+            new_container.appendChild(new_message);
+            chat_list.scrollTop = chat_list.scrollHeight;       // scroll을 자동으로 아래로 이동 (scrollHeight은 전체 높이를 의미)
         };
 
         send.addEventListener('click', (e) => {     // 사용자 채팅 전송 버튼에 click event 추가
