@@ -1,6 +1,6 @@
 from aiohttp import web
 import aiohttp_cors
-import aioredis
+import redis.asyncio as redis
 import asyncio
 import async_timeout
 import aiohttp_session
@@ -15,7 +15,7 @@ async def index(request):               # '/'에 대한 GET 요청 발생 시 �
 
     # 세션 ID를 함께 return하는 web.Response 객체 생성
     response = web.Response(text=f.read(), content_type='text/html')
-    response.set_cookie('sessionId', session['id'])
+    response.set_cookie('sessionId', session['id' ])
 
     return response
 
@@ -44,7 +44,7 @@ async def websocket_handler(request):
     app = request.app
     ws  = web.WebSocketResponse()
     await ws.prepare(request)
-    session         = await get_session(request)
+    session = await get_session(request)
 
     app['websockets'].add(ws)
 
@@ -69,7 +69,7 @@ async def init_app():                               # 웹 애플리케이션 관
     ]
     app.add_routes(routes)                          # 웹 애플리케이션 route 등록
     app['websockets']   = set()                     # 웹 소켓 클라이언트 집합 생성
-    app['redis']        = await aioredis.from_url("redis://localhost")
+    app['redis']        = await redis.from_url("redis://localhost")
     app['pubsub']       = app['redis'].pubsub()     # redis Publish/Subscribe 메시징을 위하여 할당
     await app['pubsub'].subscribe('single_room')    # single-room 채팅
 
