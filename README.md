@@ -21,14 +21,19 @@ git clone https://github.com/Choi-Jiwon-38/2023_lablup_toy_project.git
 cd 2023_lablup_toy_project
 ```
 
-3. 프로젝트가 정상적으로 실행될 수 있도록 redis 서버를 실행합니다.
+3. 프로젝트에 사용된 pip 패키지를 모두 설치합니다.
+```bash
+pip install -r requirements.txt
+```
+
+4. 프로젝트가 정상적으로 실행될 수 있도록 redis 서버를 실행합니다.
 ```bash
 docker run 6379:6379 -it redis/redis-stack:latest
 ```
 
-4. chat app의 서버를 실행합니다.
+5. chat app의 서버를 실행합니다.
 ```bash
 python server.py
 ```
 
-5. [http://localhost:8080](http://localhost:8080)에 접속하여 프로젝트 결과물을 확인할 수 있습니다.
+6. [http://localhost:8080](http://localhost:8080)에 접속하여 프로젝트 결과물을 확인할 수 있습니다.
