@@ -7,6 +7,7 @@ import aiohttp_session
 from aiohttp_session import get_session
 import uuid
 
+
 async def index(request):               # '/'에 대한 GET 요청 발생 시 실행
     f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
     session         = await get_session(request)
@@ -69,7 +70,7 @@ async def init_app():                               # 웹 애플리케이션 관
     ]
     app.add_routes(routes)                          # 웹 애플리케이션 route 등록
     app['websockets']   = set()                     # 웹 소켓 클라이언트 집합 생성
-    app['redis']        = await redis.from_url("redis://localhost")
+    app['redis']        = await redis.from_url("redis://redis")
     app['pubsub']       = app['redis'].pubsub()     # redis Publish/Subscribe 메시징을 위하여 할당
     await app['pubsub'].subscribe('single_room')    # single-room 채팅
 

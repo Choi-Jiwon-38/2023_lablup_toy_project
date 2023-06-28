@@ -147,6 +147,7 @@
             var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
             return value? value[2] : null;
         }
+        const session_id    = get_cookie('sessionId');
 
         const ws        = new WebSocket(`ws://${window.location.host}/ws`);                 // WebSocket 생성 및 할당
         ws.onopen       = ()  => {console.log('Successfully connected to the server')};     // WebSocket 연결 성공 시, console log 출력
@@ -157,7 +158,7 @@
             new_message.innerHTML = data_object.message;                            // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
             
             // 자신이 보낸 메세지와 상대방이 보낸 메세지를 구별하기 위함
-            if (get_cookie('sessionId') == data_object.id) {    // 본인이 보낸 메세지인 경우 (session id가 일치하는 경우)
+            if (session_id == data_object.id) {    // 본인이 보낸 메세지인 경우 (session id가 일치하는 경우)
                 new_container.className = 'chat_mine'
                 new_message.className   = 'chat_bubble_mine';   // style 적용을 위하여 class 부여
             } else {                                            // 상대방이 보낸 메세지인 경우 (session id가 일치하지 않는 경우)
