@@ -21,19 +21,10 @@ git clone https://github.com/Choi-Jiwon-38/2023_lablup_toy_project.git
 cd 2023_lablup_toy_project
 ```
 
-3. 프로젝트에 사용된 pip 패키지를 모두 설치합니다.
+3. Docker Compose 파일에 정의된 서비스를 build 하여 필요한 Docker 이미지, 의존성, 설정 등을 설치 및 적용합니다.
 ```bash
-pip install -r requirements.txt
+docker compose build
+docker-compose up
 ```
 
-4. 프로젝트가 정상적으로 실행될 수 있도록 redis 서버를 실행합니다.
-```bash
-docker run 6379:6379 -it redis/redis-stack:latest
-```
-
-5. chat app의 서버를 실행합니다.
-```bash
-python server.py
-```
-
-6. [http://localhost:8080](http://localhost:8080)에 접속하여 프로젝트 결과물을 확인할 수 있습니다.
+4. [http://localhost:8080](http://localhost:8080)에 접속하여 프로젝트 결과물을 확인할 수 있습니다.
