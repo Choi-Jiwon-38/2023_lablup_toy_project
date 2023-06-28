@@ -1,5 +1,4 @@
 from aiohttp import web
-import aiohttp_cors
 import aiohttp_session
 from aiohttp_session import get_session
 import uuid
@@ -55,11 +54,6 @@ async def init_app():                               # 웹 애플리케이션 관
     app.add_routes(routes)                          # 웹 애플리케이션 route 등록
     app['websockets']   = set()                     # 웹 소켓 클라이언트 집합 생성
 
-    # CORS 설정
-    cors = aiohttp_cors.setup(app)
-    for route in list(app.router.routes()):
-        cors.add(route)
-    
     # 브라우저 세션 설정 (브라우저 세션마다 고유 id 할당 목적)
     aiohttp_session.setup(app, aiohttp_session.SimpleCookieStorage())
 
