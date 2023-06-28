@@ -1,8 +1,5 @@
 from aiohttp import web
 import aiohttp_cors
-import redis.asyncio as redis
-import asyncio
-import async_timeout
 import aiohttp_session
 from aiohttp_session import get_session
 import uuid
@@ -12,7 +9,6 @@ async def index(request):               # '/'에 대한 GET 요청 발생 시 �
     f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
     session         = await get_session(request)
     session['id']   = str(uuid.uuid4())
-    print(session['id'])
 
     # 세션 ID를 함께 return하는 web.Response 객체 생성
     response = web.Response(text=f.read(), content_type='text/html')
@@ -22,23 +18,11 @@ async def index(request):               # '/'에 대한 GET 요청 발생 시 �
 
 
 async def chat_get_handler(request):
-    redis_pubsub = request.app['pubsub']
-
-    while True:
-        try:
-            async with async_timeout.timeout(1):
-                message = await redis_pubsub.get_message(ignore_subscribe_messages=True)
-                if message is not None:
-                    print(message['data'].decode())
-                break
-        except asyncio.TimeoutError:
-            pass
-
+    pass
 
 
 async def chat_post_handler(request, message):
-    redis_client = request.app['redis']
-    await redis_client.publish('single_room', message)
+    pass
 
 
 async def websocket_handler(request):
@@ -70,9 +54,6 @@ async def init_app():                               # 웹 애플리케이션 관
     ]
     app.add_routes(routes)                          # 웹 애플리케이션 route 등록
     app['websockets']   = set()                     # 웹 소켓 클라이언트 집합 생성
-    app['redis']        = await redis.from_url("redis://redis")
-    app['pubsub']       = app['redis'].pubsub()     # redis Publish/Subscribe 메시징을 위하여 할당
-    await app['pubsub'].subscribe('single_room')    # single-room 채팅
 
     # CORS 설정
     cors = aiohttp_cors.setup(app)
