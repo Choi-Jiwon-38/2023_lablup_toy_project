@@ -16,14 +16,6 @@ async def index(request):               # '/'에 대한 GET 요청 발생 시 �
     return response
 
 
-async def chat_get_handler(request):
-    pass
-
-
-async def chat_post_handler(request, message):
-    pass
-
-
 async def websocket_handler(request):
     app = request.app
     ws  = web.WebSocketResponse()
@@ -35,7 +27,6 @@ async def websocket_handler(request):
     try:
         async for message in ws:
             for client in app['websockets']:
-                await chat_post_handler(request, str(message.data))
                 await client.send_json({'id': session['id'], 'message': message.data})
     finally:
         app['websockets'].remove(ws)
@@ -47,8 +38,6 @@ async def init_app():                               # 웹 애플리케이션 관
     app     = web.Application()                     # aiohttp 웹 애플리케이션 생성 및 할당
     routes  = [
         web.get('/', index),                        # 사용자에게 보여지는 웹 브라우저
-        web.get('/chat', chat_get_handler),         # Chating 핸들러 (GET)
-        web.post('/chat', chat_post_handler),       # Chating 핸들러 (POST)
         web.get('/ws', websocket_handler),          # WebSocket 핸들러
     ]
     app.add_routes(routes)                          # 웹 애플리케이션 route 등록
