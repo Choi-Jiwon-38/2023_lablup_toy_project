@@ -22,9 +22,13 @@ cd 2023_lablup_toy_project
 ```
 
 3. Docker Compose 파일에 정의된 서비스를 build 하여 필요한 Docker 이미지, 의존성, 설정 등을 설치 및 적용합니다.
-```bash
+```bash 
 docker compose build
 docker-compose up
+```
+또한, 아래의 명령어를 통하여 compose up과 build를 동시에 진행할 수 있습니다.
+```bash
+docker-compose up --build
 ```
 
 4. [http://localhost:8080](http://localhost:8080)에 접속하여 프로젝트 결과물을 확인할 수 있습니다.
