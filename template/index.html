@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat with aiohttp</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* input 관련 style 초기화 */
+        input {
+            -webkit-appearance : none; 
+            -moz-appearance:none;
+            appearance: none;
+            outline: none;
+            border: none;
+            background: transparent;
+        }
+        input::-ms-clear { display: none; }
+
+        /* button 관련 style 초기화 */
+        button {
+            border: none;
+        }
+
+        button:focus {
+            border: none;
+            outline: none;
+        }
+
+        button:focus{
+            outline:none !important;
+        }
+
+        /* 채팅창 관련 style 설정 */
+        #chat_container {
+            width: 360px;
+            height: 800px;
+            border-radius: 10px;
+            border-color: #525252;
+            background-color: #191919;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #chat_title {
+            width: 100%;
+            text-align: center;
+            color: white;
+            padding: 24px 0px;
+        }
+        #chat_input {
+            display: flex;
+            background-color: #262626;
+            width: 100%;
+            height: 36px;
+            padding: 12px 0px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        #chat_list {
+            height: 100%;
+            overflow-y: scroll;
+        }
+        
+        /* scroll bar 관련 style 설정 */
+        #chat_list::-webkit-scrollbar {
+            width: 10px;
+            background-color: #262626;
+        }
+        #chat_list::-webkit-scrollbar-thumb {
+            background-color: #686868;
+            border-radius: 10px;
+            background-clip: padding-box;
+            border: 2px solid transparent;
+        }
+        #chat_list::-webkit-scrollbar-track {
+            background-color: #262626;
+            border-radius: 10px;
+        }
+
+        #chat_message {
+            width: 100%;
+            background-color: #262626;
+            color: white;
+            padding-left: 12px;
+        }
+        #send {
+            width: 52px;
+            margin-right: 12px;
+            background-color: #FAE54D;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .chat_mine {
+            display: flex;
+            justify-content: flex-end;
+
+            .msg_and_time {
+                display: flex;
+                flex-direction: row-reverse;
+            }
+        }
+        .chat_other {
+            display: flex;
+            flex-direction: column;
+        }
+        .chat_bubble_mine {
+            width: fit-content;
+            background-color: #FAE54D;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 4px 16px 4px 6px;
+        }   
+        .chat_bubble_other {
+            width: fit-content;
+            background-color: #383838;
+            color: white;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 4px 6px 4px 16px;
+        }   
+        .chat_id {
+            color: white;
+            margin: 2px 16px;
+        }
+        .chat_time {
+            color: #A3A3A3;
+            font-size: 14px;
+        }
+        .msg_and_time {
+            display: flex;
+            align-items: end;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat_container">
+        <div id="chat_title">Simple Chat with aiohttp</div>
+        <div id="chat_list"></div>
+        <div id="chat_input">
+            <input type="text" id="chat_message" maxlength="22">
+            <button id="send">전송</button>
+        </div>
+    </div>
+    <script type="text/javascript">
+        chat_list       = document.querySelector('#chat_list');     // 전체 채팅 목록 화면
+        chat_input      = document.querySelector('#chat_input');
+        chat_message    = document.querySelector('#chat_message');  // 사용자 채팅 입력 화면
+        send            = document.querySelector('#send');          // 사용자 채팅 전송 버튼
+
+        function get_cookie(name) { // name을 통하여 특정 cookie 찾아서 값을 반환하는 함수
+            var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return value? value[2] : null;
+        }
+        const session_id    = get_cookie('sessionId');
+
+        const ws        = new WebSocket(`ws://${window.location.host}/ws`);                 // WebSocket 생성 및 할당
+        ws.onopen       = ()  => {console.log('Successfully connected to the server')};     // WebSocket 연결 성공 시, console log 출력
+        ws.onmessage    = (e) => {
+            data_object = JSON.parse(e.data);
+            const new_container = document.createElement('div');
+            const new_message   = document.createElement('div');                    // 새로운 채팅 메세지를 담을 div 태그 생성
+            const new_time      = document.createElement('p');
+            const msg_time_box  = document.createElement('div');
+
+            new_message.innerHTML   = data_object.message;                            // div 태그 내용을 WebSocket이 전송 받은 message의 data로 설정
+            new_time.innerHTML      = data_object.time;
+
+            // 자신이 보낸 메세지와 상대방이 보낸 메세지를 구별하기 위함
+            chat_list.appendChild(new_container);
+
+            if (session_id == data_object.id) {    // 본인이 보낸 메세지인 경우 (session id가 일치하는 경우)
+                new_container.className = 'chat_mine'
+                new_message.className   = 'chat_bubble_mine';   // style 적용을 위하여 class 부여
+            } else {                                            // 상대방이 보낸 메세지인 경우 (session id가 일치하지 않는 경우)
+                new_container.className = 'chat_other'
+                new_message.className   = 'chat_bubble_other';  // style 적용을 위하여 class 부여
+
+                const chat_id       = document.createElement('div');
+                chat_id.className   = 'chat_id';                                // style 적용을 위하여 class 부여
+                chat_id.innerHTML   = 'user-' + data_object.id.substr(0,5);     // message 요청자의 session id의 일부를 id로 사용 
+                new_container.appendChild(chat_id);
+            }
+            new_time.className      = 'chat_time';
+            msg_time_box.className  = 'msg_and_time'
+
+            msg_time_box.appendChild(new_message);
+            msg_time_box.appendChild(new_time);
+            new_container.appendChild(msg_time_box);
+            
+            chat_list.scrollTop = chat_list.scrollHeight;       // scroll을 자동으로 아래로 이동 (scrollHeight은 전체 높이를 의미)
+        };
+
+        send.addEventListener('click', (e) => {     // 사용자 채팅 전송 버튼에 click event 추가
+            if (chat_message.value == '')           // input에 사용자가 입력한 값이 없을 경우
+                return;
+            ws.send(chat_message.value);
+            chat_message.value = '';                // 메세지 전송 성공 시, 메세지 입력 창 초기화
+        })
+
+        chat_input.addEventListener('keyup', (e) => {   // chat_input 안에서 사용자가 누른 키보드 키가 올라올 때
+            if (e.keyCode == 13) {                      // 사용자가 누른 키보드의 key code가 13일 때 (ENTER)
+                e.preventDefault();                     // 이벤트 기본 동작(ex: form 제출)를 막기 위하여 사용
+                send.click();                           // send(채팅 전송 버튼)에 click 이벤트 발생
+            }
+        })
+    </script>
+</body>
+</html>
