@@ -5,6 +5,8 @@ import uuid
 import redis.asyncio as redis
 import json
 import asyncio
+from datetime import datetime
+
 
 redis_pool = redis.ConnectionPool(host='redis', port=6379, db=0)
 
@@ -40,9 +42,11 @@ async def websocket_handler(request):
 
     try:
         async for message in ws:
+            now = datetime.now()                                # datetime을 이용하여 현재 시간 저장
             data = json.dumps({
-                'id': session['id'],            # session의 id (사용자 식별의 용도로 사용)
-                'message': str(message.data),   # 사용자가 socket을 통해 보낸 message
+                'id'        : session['id'],                    # session의 id (사용자 식별의 용도로 사용)
+                'message'   : str(message.data),                # 사용자가 socket을 통해 보낸 message
+                'time'      : f'{now.hour}:{now.minute}',       # 메세지 전송 시간
             })
             await app['redis'].publish('messages', data)                                    # message 채널(single-room)에 위에서 정의한 data를 publish
             asyncio.create_task(send_message_to_client(app['pubsub'], app['websockets']))   # client에게 message를 전송하는 작업(redis에서 get -> ws로 전송)을 비동기적으로 처리하기 위하여 create_task 사용
