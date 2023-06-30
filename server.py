@@ -3,9 +3,10 @@ import aiohttp_session
 from aiohttp_session import get_session
 import uuid
 import redis.asyncio as redis
+import json
+import asyncio
 
-
-redis_pool = redis.ConnectionPool(host='redis', port=6379, db=0)
+redis_pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
 
 async def index(request):               # '/'에 대한 GET 요청 발생 시 실행
     f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
@@ -27,10 +28,25 @@ async def websocket_handler(request):
 
     app['websockets'].add(ws)
 
+    async def send_message_to_client(pubsub, clients):
+        json_message = await pubsub.get_message('messages')
+
+        while json_message is None:
+            await asyncio.sleep(0.1)
+            json_message = await pubsub.get_message('messages')
+
+        for client in clients:
+            await client.send_json(json.loads(json_message['data']))
+
     try:
         async for message in ws:
-            for client in app['websockets']:
-                await client.send_json({'id': session['id'], 'message': message.data})
+            data = json.dumps({
+                'id': session['id'],
+                'message': str(message.data),
+            })
+            await app['redis'].publish('messages', data)
+            asyncio.create_task(send_message_to_client(app['pubsub'], app['websockets']))
+
     finally:
         app['websockets'].remove(ws)
 
@@ -48,7 +64,7 @@ async def init_app():                               # 웹 애플리케이션 관
     app['redis']        = redis.Redis(connection_pool=redis_pool)
     app['pubsub']       = app['redis'].pubsub()
 
-    app['pubsub'].subscribe('messages')
+    await app['pubsub'].subscribe('messages')
 
     # 브라우저 세션 설정 (브라우저 세션마다 고유 id 할당 목적)
     aiohttp_session.setup(app, aiohttp_session.SimpleCookieStorage())
