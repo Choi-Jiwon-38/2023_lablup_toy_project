@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 
 
-redis_pool = redis.ConnectionPool(host='redis', port=6379, db=0)
+redis_pool = redis.ConnectionPool(host='redis', port=6379, db=0)        # Redis pool에 대한 설정
 
 async def index(request):               # '/'에 대한 GET 요청 발생 시 실행
     f = open('./template/index.html')   # template 디렉토리의 index.html 파일을 읽은 뒤, f에 파일 객체 할당
@@ -16,8 +16,8 @@ async def index(request):               # '/'에 대한 GET 요청 발생 시 �
     session['id']   = str(uuid.uuid4())
 
     # 세션 ID를 함께 return하는 web.Response 객체 생성
-    response = web.Response(text=f.read(), content_type='text/html')
-    response.set_cookie('sessionId', session['id' ])
+    response = web.Response(text=f.read(), content_type='text/html')    # ./template/index.html 파일을 읽어서 web 응답 객체로 만듦
+    response.set_cookie('sessionId', session['id' ])                    # web 응답 객체마다 고유 session id를 생성하고 cookie로 부여함
 
     return response
 
@@ -65,10 +65,10 @@ async def init_app():                           # 웹 애플리케이션 관련 
     ]
     app.add_routes(routes)                      # 웹 애플리케이션 route 등록
     app['websockets']   = set()                 # 웹 소켓 클라이언트 집합 생성
-    app['redis']        = redis.Redis(connection_pool=redis_pool)
-    app['pubsub']       = app['redis'].pubsub()
+    app['redis']        = redis.Redis(connection_pool=redis_pool)   # Redis pool에 연결된 Redis client 할당
+    app['pubsub']       = app['redis'].pubsub()                     # 위 Redis client의 pubsub 객체 할당
 
-    await app['pubsub'].subscribe('messages')
+    await app['pubsub'].subscribe('messages')                       # single-room이므로 'messages'라는 1개의 채널만 구독함
 
     # 브라우저 세션 설정 (브라우저 세션마다 고유 id 할당 목적)
     aiohttp_session.setup(app, aiohttp_session.SimpleCookieStorage())
